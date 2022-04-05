@@ -1,0 +1,12 @@
+.row {
+  m-card-group {
+    m-card {
+      m-icon {
+        cursor: pointer;
+        &:hover {
+          color: var(--hover05);
+        }
+      }
+    }
+  }
+}

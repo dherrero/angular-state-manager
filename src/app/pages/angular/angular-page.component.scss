@@ -1,0 +1,13 @@
+.row {
+  .card {
+    &-body {
+      cursor: pointer;
+      i {
+        cursor: pointer;
+        &:hover {
+          color: red;
+        }
+      }
+    }
+  }
+}

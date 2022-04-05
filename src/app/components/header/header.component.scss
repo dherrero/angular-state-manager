@@ -1,0 +1,13 @@
+m-header {
+  a {
+    padding: 0.75rem;
+    text-decoration: none;
+    color: var(--interactive01);
+    &.active {
+      border: 1px solid var(--active01);
+    }
+    &:hover {
+      color: var(--interactive02);
+    }
+  }
+}
