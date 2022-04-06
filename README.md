@@ -1,4 +1,4 @@
-# Angular State Manager
+# Angular State Management
 
 This project is to test and compare different libraries and methods for handling Angular state.
 
@@ -10,7 +10,8 @@ Techniques:
 - [x] [Ngrx](https://ngrx.io)
 - [x] [Elf](https://ngneat.github.io/elf)
 - [x] [NGXS](https://www.ngxs.io)
-- [ ] Pure Redux (TODO)
+- [ ] Pure Redux - TODO
+- [ ] [Observable-Store](https://github.com/DanWahlin/Observable-Store) - TODO
 
 
 ## Development server
