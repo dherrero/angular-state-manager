@@ -2,6 +2,7 @@ import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { User } from '@models/user.state';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { UserStoreElfService } from '@services/elf/user-store-elf.service';
+import { deepClone } from 'app/utils/utils';
 import { Observable } from 'rxjs';
 import { take, tap } from 'rxjs/operators';
 
@@ -47,7 +48,7 @@ export class ElfPageComponent implements OnInit {
 
   addFriend(e: Event, user: User) {
     e.stopPropagation();
-    const userUpdate = this.copyUser(user);
+    const userUpdate = deepClone<User>(user);
     userUpdate.friends.push({ id: `random-friend-${Math.random()}` });
     this.userStore.updateUser(userUpdate);
     // Con Elf tampoco protege el estado con lo que se puede invocar directamente a
@@ -57,7 +58,7 @@ export class ElfPageComponent implements OnInit {
 
   removeFriend(e: Event, user: User) {
     e.stopPropagation();
-    const userUpdate = this.copyUser(user);
+    const userUpdate = deepClone<User>(user);
     userUpdate.friends.pop();
     this.userStore.updateUser(userUpdate);
   }
@@ -65,9 +66,5 @@ export class ElfPageComponent implements OnInit {
   removeUser(e: Event, user: User) {
     e.stopPropagation();
     this.userStore.removeUser(user);
-  }
-
-  private copyUser(user: User): User {
-    return { ...user, friends: [...user.friends] };
   }
 }

@@ -4,16 +4,21 @@ import { UserRequest } from '@interfaces/user.request';
 import { UserState, User, defaultUserState } from '@models/user.state';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { distinctUntilChanged, map, take, tap } from 'rxjs/operators';
+import { deepFreeze } from 'app/utils/utils';
 
 /**
  * UserStoreService
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class UserStoreService {
-  private readonly $dataSource = new BehaviorSubject<UserState>(defaultUserState);
-  private readonly data$: Observable<UserState> = this.$dataSource.asObservable().pipe(distinctUntilChanged());
+  private readonly $dataSource = new BehaviorSubject<UserState>(
+    defaultUserState
+  );
+  private readonly data$: Observable<UserState> = this.$dataSource
+    .asObservable()
+    .pipe(distinctUntilChanged());
 
   /**
    * Class constructor
@@ -32,7 +37,7 @@ export class UserStoreService {
 
   getUsers(): Observable<User[]> {
     return this.data$.pipe(
-      map((state) => state.users),
+      map((state) => deepFreeze<User[]>(state.users)), // prevents data exposed being altered by reference
       distinctUntilChanged()
     );
   }
@@ -43,12 +48,16 @@ export class UserStoreService {
   }
 
   updateUser(user: User) {
-    const users = this.$dataSource.getValue().users.map((u) => (u.userId === user.userId ? { ...user } : u));
+    const users = this.$dataSource
+      .getValue()
+      .users.map((u) => (u.userId === user.userId ? { ...user } : u));
     this.$setData([...users]);
   }
 
   removeUser(user: User) {
-    const users = this.$dataSource.getValue().users.filter((u) => u.userId !== user.userId);
+    const users = this.$dataSource
+      .getValue()
+      .users.filter((u) => u.userId !== user.userId);
     this.$setData([...users]);
   }
 
