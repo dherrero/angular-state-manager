@@ -10,6 +10,7 @@ Techniques:
 - [x] [Ngrx](https://ngrx.io)
 - [x] [Elf](https://ngneat.github.io/elf)
 - [x] [NGXS](https://www.ngxs.io)
+- [ ] Pure Redux (TODO)
 
 
 ## Development server
