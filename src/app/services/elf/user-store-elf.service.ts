@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { UserRequest } from '@interfaces/user.request';
 import { User } from '@models/user.state';
-import { select } from '@ngneat/elf';
+import { deepFreeze, select } from '@ngneat/elf';
 import { UsersService } from '@services/users.service';
 import { Observable } from 'rxjs';
 import { take, tap } from 'rxjs/operators';
@@ -11,7 +11,7 @@ import { userElfStore } from './user-elf.store';
  * UserStoreElfService
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class UserStoreElfService {
   /**
@@ -27,20 +27,22 @@ export class UserStoreElfService {
   }
 
   getUsers(): Observable<User[]> {
-    return userElfStore.pipe(select((state) => state.users));
+    return userElfStore.pipe(select((state) => deepFreeze(state.users))); // prevents data exposed being altered by reference
   }
 
   // ACTIONS
   addUser(user: User): void {
     userElfStore.update((state) => ({
       loading: false,
-      users: [...state.users, user]
+      users: [...state.users, user],
     }));
   }
 
   updateUser(user: User): void {
     userElfStore.update((state) => {
-      const users = state.users.map((u) => (u.userId === user.userId ? { ...user } : u));
+      const users = state.users.map((u) =>
+        u.userId === user.userId ? { ...user } : u
+      );
       return { loading: false, users: [...users] };
     });
   }
