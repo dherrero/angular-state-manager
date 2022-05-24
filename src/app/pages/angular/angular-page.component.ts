@@ -2,6 +2,7 @@ import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { User } from '@models/user.state';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { UserStoreService } from '@services/angular/user-store.service';
+import { deepClone } from 'app/utils/utils';
 import { Observable } from 'rxjs';
 
 /**
@@ -46,19 +47,19 @@ export class AngularPageComponent implements OnInit {
 
   addFriend(e: Event, user: User) {
     e.stopPropagation();
-    const userUpdate = this.copyUser(user);
-    userUpdate.friends.push({ id: `random-friend-${Math.random()}` });
-    this.userStore.updateUser(userUpdate);
-    // Los servicios Angular puros no protegen el estado y
-    // podemos actualizar directamente los Friends del usuario con:
-    // user.friends.push({ id: `random-friend-${Math.random()}` });
-    // Esto es debido a que el array de friends se pasa por referencia
-    // pero no es buena práctica modificar el estado sin los métodos creados para ello
+    try {
+      user.friends.push({ id: `random-friend-${Math.random()}` }); //it will fail
+    } catch (e) {
+      console.error(e);
+      const userUpdate = deepClone(user);
+      userUpdate.friends.push({ id: `random-friend-${Math.random()}` });
+      this.userStore.updateUser(userUpdate);
+    }
   }
 
   removeFriend(e: Event, user: User) {
     e.stopPropagation();
-    const userUpdate = this.copyUser(user);
+    const userUpdate = deepClone(user);
     userUpdate.friends.pop();
     this.userStore.updateUser(userUpdate);
   }
@@ -66,9 +67,5 @@ export class AngularPageComponent implements OnInit {
   removeUser(e: Event, user: User) {
     e.stopPropagation();
     this.userStore.removeUser(user);
-  }
-
-  private copyUser(user: User): User {
-    return { ...user, friends: [...user.friends] };
   }
 }
