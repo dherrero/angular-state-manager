@@ -1,9 +1,12 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { UserRequest } from '@interfaces/user.request';
 import { User } from '@models/user.state';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { Actions } from '@services/angular/reducers';
 import { UserStoreService } from '@services/angular/user-store.service';
+import { UsersService } from '@services/users.service';
 import { deepClone } from 'app/utils/utils';
-import { Observable } from 'rxjs';
+import { Observable, take, tap } from 'rxjs';
 
 /**
  * AngularPage.Component
@@ -23,12 +26,23 @@ export class AngularPageComponent implements OnInit {
 
   constructor(
     private userStore: UserStoreService,
-    private modalService: NgbModal
+    private modalService: NgbModal,
+    private users: UsersService
   ) {}
 
   ngOnInit(): void {
-    this.loading$ = this.userStore.isLoading();
-    this.users$ = this.userStore.getUsers();
+    this.loading$ = this.userStore.select$<boolean>('loading');
+    this.users$ = this.userStore.select$<User[]>('users');
+    if (this.userStore.get<boolean>('loading'))
+      this.users
+        .get()
+        .pipe(
+          tap((results: UserRequest) => {
+            this.userStore.dispatch(Actions.SET_USERS, results.users);
+          }),
+          take(1)
+        )
+        .subscribe();
   }
 
   userId(_: number, user: User) {
@@ -38,7 +52,7 @@ export class AngularPageComponent implements OnInit {
   renameUser(user: User) {
     this.userSelected = { ...user, friends: [...user.friends] };
     this.modalService.open(this.dialogTemplate).result.finally(() => {
-      this.userStore.updateUser({
+      this.userStore.dispatch(Actions.UPDATE_USER, {
         ...this.userSelected,
         friends: [...this.userSelected.friends],
       });
@@ -47,25 +61,16 @@ export class AngularPageComponent implements OnInit {
 
   addFriend(e: Event, user: User) {
     e.stopPropagation();
-    try {
-      user.friends.push({ id: `random-friend-${Math.random()}` }); //it will fail
-    } catch (e) {
-      console.error(e);
-      const userUpdate = deepClone(user);
-      userUpdate.friends.push({ id: `random-friend-${Math.random()}` });
-      this.userStore.updateUser(userUpdate);
-    }
+    this.userStore.dispatch(Actions.ADD_FRIEND, user);
   }
 
   removeFriend(e: Event, user: User) {
     e.stopPropagation();
-    const userUpdate = deepClone(user);
-    userUpdate.friends.pop();
-    this.userStore.updateUser(userUpdate);
+    this.userStore.dispatch(Actions.REMOVE_FRIEND, user);
   }
 
   removeUser(e: Event, user: User) {
     e.stopPropagation();
-    this.userStore.removeUser(user);
+    this.userStore.dispatch(Actions.REMOVE_USER, user);
   }
 }
