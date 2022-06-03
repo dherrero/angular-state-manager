@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
+import { UserState, defaultUserState, User } from '@models/user.state';
+import { Actions, userReducer } from './reducers';
+import { StoreService } from 'app/classes/store-service';
 import { UsersService } from '@services/users.service';
+import { take, tap } from 'rxjs';
 import { UserRequest } from '@interfaces/user.request';
-import { UserState, User, defaultUserState } from '@models/user.state';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { distinctUntilChanged, map, take, tap } from 'rxjs/operators';
-import { deepFreeze } from 'app/utils/utils';
 
 /**
  * UserStoreService
@@ -12,66 +12,20 @@ import { deepFreeze } from 'app/utils/utils';
 @Injectable({
   providedIn: 'root',
 })
-export class UserStoreService {
-  private readonly $dataSource = new BehaviorSubject<UserState>(
-    defaultUserState
-  );
-  private readonly data$: Observable<UserState> = this.$dataSource
-    .asObservable()
-    .pipe(distinctUntilChanged());
+export class UserStoreService extends StoreService<UserState> {
+  users$ = this.select<User[]>('users');
+  loading$ = this.select<boolean>('loading');
 
-  /**
-   * Class constructor
-   */
   constructor(private users: UsersService) {
-    this.$fetchUsers();
+    super('userState', defaultUserState, userReducer, false, true);
   }
 
-  // GETTERS
-  isLoading(): Observable<boolean> {
-    return this.data$.pipe(
-      map((state) => state.loading),
-      distinctUntilChanged()
-    );
-  }
-
-  getUsers(): Observable<User[]> {
-    return this.data$.pipe(
-      map((state) => deepFreeze<User[]>(state.users)), // prevents data exposed being altered by reference
-      distinctUntilChanged()
-    );
-  }
-
-  // ACTIONS
-  addUser(user: User) {
-    this.$setData([...this.$dataSource.getValue().users, user]);
-  }
-
-  updateUser(user: User) {
-    const users = this.$dataSource
-      .getValue()
-      .users.map((u) => (u.userId === user.userId ? { ...user } : u));
-    this.$setData([...users]);
-  }
-
-  removeUser(user: User) {
-    const users = this.$dataSource
-      .getValue()
-      .users.filter((u) => u.userId !== user.userId);
-    this.$setData([...users]);
-  }
-
-  // PRIVATE METHODS
-  private $setData(users: User[]) {
-    this.$dataSource.next({ loading: false, users: [...users] });
-  }
-
-  private $fetchUsers() {
+  loadUserEffect() {
     this.users
       .get()
       .pipe(
         tap((results: UserRequest) => {
-          this.$setData(results.users);
+          this.dispatch<User[]>(Actions.SET_USERS, results.users);
         }),
         take(1)
       )
