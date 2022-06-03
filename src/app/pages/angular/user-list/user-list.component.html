@@ -1,5 +1,5 @@
 <ul>
-  <li *ngFor="let user of users$ | async as users; trackBy: userId">
+  <li *ngFor="let user of userStore.users$ | async as users; trackBy: userId">
     {{ user.firstname }} {{ user.lastname }} - Friends {{ user.friends.length }}
   </li>
 </ul>

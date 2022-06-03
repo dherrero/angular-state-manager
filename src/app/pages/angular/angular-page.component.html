@@ -1,9 +1,9 @@
-<div *ngIf="(loading$ | async) === false; else loading">
+<div *ngIf="(userStore.loading$ | async) === false; else loading">
   <div class="row">
     <h3>Store with Angular service</h3>
     <div
       class="card col-6"
-      *ngFor="let user of users$ | async as users; trackBy: userId"
+      *ngFor="let user of userStore.users$ | async as users; trackBy: userId"
     >
       <div class="card-body" (click)="renameUser(user)">
         <div class="col p-1 m-0">

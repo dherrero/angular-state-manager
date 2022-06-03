@@ -17,32 +17,18 @@ import { Observable, take, tap } from 'rxjs';
   styleUrls: ['./angular-page.component.scss'],
 })
 export class AngularPageComponent implements OnInit {
-  loading$!: Observable<boolean>;
-  users$!: Observable<User[]>;
-
   userSelected!: User;
 
   @ViewChild('dialogTemplate') dialogTemplate!: TemplateRef<unknown>;
 
   constructor(
-    private userStore: UserStoreService,
+    public userStore: UserStoreService,
     private modalService: NgbModal,
     private users: UsersService
   ) {}
 
   ngOnInit(): void {
-    this.loading$ = this.userStore.select$<boolean>('loading');
-    this.users$ = this.userStore.select$<User[]>('users');
-    if (this.userStore.get<boolean>('loading'))
-      this.users
-        .get()
-        .pipe(
-          tap((results: UserRequest) => {
-            this.userStore.dispatch(Actions.SET_USERS, results.users);
-          }),
-          take(1)
-        )
-        .subscribe();
+    if (this.userStore.get<boolean>('loading')) this.userStore.loadUserEffect();
   }
 
   userId(_: number, user: User) {

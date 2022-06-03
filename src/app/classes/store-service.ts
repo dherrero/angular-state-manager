@@ -1,25 +1,28 @@
 import { BehaviorSubject, Observable } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 
-export abstract class StateService<T> {
+export abstract class StoreService<T> {
   #storeName: string;
   #defaultState: T;
   #store: BehaviorSubject<T>;
   #data$: Observable<T>;
-  #cacheStore: boolean;
   #reducers: Map<string, (state: T, payload: unknown) => T>;
+  #freezStore: boolean;
+  #cacheStore: boolean;
   #storageApi: 'localStorage' | 'sessionStorage';
 
   constructor(
     storeName: string,
     defaultState: T,
     reducers: Map<string, (state: T, payload: unknown) => T>,
+    freezeStore: boolean = true,
     cacheStore: boolean = true,
     storageApi: 'localStorage' | 'sessionStorage' = 'localStorage'
   ) {
     this.#storeName = storeName;
     this.#defaultState = defaultState;
     this.#reducers = reducers;
+    this.#freezStore = freezeStore;
     this.#cacheStore = cacheStore;
     this.#storageApi = storageApi;
 
@@ -29,10 +32,17 @@ export abstract class StateService<T> {
     this.#data$ = this.#store.asObservable().pipe(distinctUntilChanged());
   }
 
-  // SELECT
-  select$<S>(key: keyof T): Observable<S> {
+  /**
+   * @param   key, Store's first level key
+   * @returns Observable<type of Key>, It will emit changes when the Store key changes.
+   */
+  select<S>(key: keyof T): Observable<S> {
     return this.#data$.pipe(
-      map((state) => this.#deepFreeze<S>(state[key])), // deepFreeze prevents data exposed being altered by reference
+      map((state) =>
+        this.#freezStore
+          ? this.#deepFreeze<S>(state[key])
+          : (state[key] as unknown as S)
+      ),
       distinctUntilChanged()
     );
   }
@@ -43,7 +53,7 @@ export abstract class StateService<T> {
   }
 
   // DISPATCHER
-  dispatch(action: string, payload: unknown) {
+  dispatch<S>(action: string, payload: S) {
     const reducer = this.#reducers.get(action);
     if (reducer) {
       const newState: T = reducer(this.#store.getValue(), payload);
@@ -54,6 +64,8 @@ export abstract class StateService<T> {
           JSON.stringify(newState)
         );
       }
+    } else {
+      throw new Error(`Error action ${action} not found in reducers Map`);
     }
   }
 
@@ -61,7 +73,10 @@ export abstract class StateService<T> {
     window[this.#storageApi].removeItem(this.#storeName);
   }
 
+  // deepFreeze prevents data exposed being altered by reference
+  // eslint-disable-next-line complexity
   #deepFreeze<S>(object: T[keyof T]): S {
+    if (!object) return object as unknown as S;
     const propNames = Object.getOwnPropertyNames(object);
     const isObject = (val: unknown): boolean =>
       Boolean(val && typeof val === 'object');
