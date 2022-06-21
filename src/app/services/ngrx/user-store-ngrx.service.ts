@@ -11,9 +11,7 @@ import * as UserSelectors from './user.selectors';
 /**
  * UserStoreNgrxService
  */
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class UserStoreNgrxService {
   /**
    * Class constructor

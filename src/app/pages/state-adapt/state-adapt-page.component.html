@@ -1,0 +1,60 @@
+<div *ngIf="(loading$ | async) === false; else loading">
+  <div class="row">
+    <h3>Store with StateAdapt</h3>
+    <div
+      class="card col-6"
+      *ngFor="let user of users$ | async as users; trackBy: userId"
+    >
+      <div class="card-body" (click)="renameUser(user)">
+        <div class="col p-1 m-0">
+          <i
+            class="float-end bi bi-person-x"
+            (click)="userRemoved$.next(user)"
+          ></i>
+        </div>
+        <div class="card-custom-content p-3">
+          <div class="card-custom-title">
+            <h4>{{ user.firstname }} {{ user.lastname }}</h4>
+          </div>
+          <div class="card-custom-body">
+            <div class="row">
+              <div class="col-6">Friends {{ user.friends.length }}</div>
+              <div class="col-6">
+                <button ngbButton (click)="friendAdded$.next(user); $event.stopPropagation()">+</button>
+                <button ngbButton (click)="friendRemoved$.next(user); $event.stopPropagation()">
+                  -
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <app-user-list-state-adapt></app-user-list-state-adapt>
+</div>
+
+<ng-template #loading>
+  <div class="d-flex justify-content-center">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #dialogTemplate let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Update user name</h4>
+    <button
+      type="button"
+      class="btn-close"
+      aria-label="Close"
+      (click)="modal.dismiss('Cross click')"
+    ></button>
+  </div>
+  <div class="modal-body">
+    <div class="modal-body">
+      <input m-input #inputData [(ngModel)]="userSelected.firstname" />
+    </div>
+  </div>
+</ng-template>

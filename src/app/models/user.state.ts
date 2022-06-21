@@ -9,7 +9,7 @@ export interface User {
   friends: Friend[];
 }
 
-interface Friend {
+export interface Friend {
   id: string;
 }
 

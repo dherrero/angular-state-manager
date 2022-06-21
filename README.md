@@ -10,6 +10,7 @@ Techniques:
 - [x] [Ngrx](https://ngrx.io)
 - [x] [Elf](https://ngneat.github.io/elf)
 - [x] [NGXS](https://www.ngxs.io)
+- [x] [StateAdapt](https://github.com/state-adapt/state-adapt)
 - [ ] Pure Redux - TODO
 - [ ] [Observable-Store](https://github.com/DanWahlin/Observable-Store) - TODO
 
