@@ -24,11 +24,11 @@ const routes: Routes = [
     loadChildren: () =>
     import('./pages/ngxs/ngxs-page.module').then((m) => m.NgxsPageModule),
   },
-  // {
-  //   path: 'state-adapt',
-  //   loadChildren: () =>
-  //     import('./pages/state-adapt/state-adapt-page.module').then((m) => m.StateAdaptPageModule),
-  // },
+  {
+    path: 'state-adapt',
+    loadChildren: () =>
+      import('./pages/state-adapt/state-adapt-page.module').then((m) => m.StateAdaptPageModule),
+  },
   {
     path: '**',
     redirectTo: '',
