@@ -9,7 +9,7 @@
         <div class="col p-1 m-0">
           <i
             class="float-end bi bi-person-x"
-            (click)="removeUser($event, user)"
+            (click)="userRemoved$.next(user)"
           ></i>
         </div>
         <div class="card-custom-content p-3">
@@ -20,8 +20,8 @@
             <div class="row">
               <div class="col-6">Friends {{ user.friends.length }}</div>
               <div class="col-6">
-                <button ngbButton (click)="addFriend($event, user)">+</button>
-                <button ngbButton (click)="removeFriend($event, user)">
+                <button ngbButton (click)="friendAdded$.next(user); $event.stopPropagation()">+</button>
+                <button ngbButton (click)="friendRemoved$.next(user); $event.stopPropagation()">
                   -
                 </button>
               </div>

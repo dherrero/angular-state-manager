@@ -1,10 +1,7 @@
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, TemplateRef, ViewChild } from '@angular/core';
 import { User } from '@models/user.state';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { UserStoreStateAdaptService } from '@services/state-adapt/user-store-state-adapt.service';
-import { deepClone } from 'app/utils/utils';
-import { Observable } from 'rxjs';
-import { take, tap } from 'rxjs/operators';
+import { UserStore } from '@services/state-adapt/user.store';
 
 /**
  * StateAdaptPage.Component
@@ -14,9 +11,13 @@ import { take, tap } from 'rxjs/operators';
   templateUrl: './state-adapt-page.component.html',
   styleUrls: ['./state-adapt-page.component.scss'],
 })
-export class StateAdaptPageComponent implements OnInit {
-  loading$!: Observable<boolean>;
-  users$!: Observable<User[]>;
+export class StateAdaptPageComponent {
+  friendAdded$ = this.userStore.friendAdded$;
+  friendRemoved$ = this.userStore.friendRemoved$;
+  userRemoved$ = this.userStore.userRemoved$;
+
+  loading$ = this.userStore.loading$;
+  users$ = this.userStore.users$;
   userSelected!: User;
 
   @ViewChild('dialogTemplate') dialogTemplate!: TemplateRef<unknown>;
@@ -25,47 +26,21 @@ export class StateAdaptPageComponent implements OnInit {
    * Class constructor
    */
   constructor(
-    private userStore: UserStoreStateAdaptService,
+    private userStore: UserStore,
     private modalService: NgbModal
   ) {}
-
-  ngOnInit(): void {
-    this.loading$ = this.userStore.isLoading();
-    this.users$ = this.userStore.getUsers();
-  }
 
   userId(_: number, user: User) {
     return user.userId;
   }
 
   renameUser(user: User) {
-    this.userSelected = { ...user, friends: [...user.friends] };
+    this.userSelected = { ...user };
     this.modalService.open(this.dialogTemplate).result.finally(() => {
-      this.userStore.updateUser({
+      this.userStore.userUpdate$.next({
         ...this.userSelected,
         friends: [...this.userSelected.friends],
       });
     });
-  }
-
-  addFriend(e: Event, user: User) {
-    e.stopPropagation();
-    const userUpdate = deepClone<User>(user);
-    userUpdate.friends.push({ id: `random-friend-${Math.random()}` });
-    this.userStore.updateUser(userUpdate);
-    // StateAdapt protege el estado
-    // con lo que no podemos hacer directamente un user.friends.push({ id: `random-friend-${Math.random()}` });
-  }
-
-  removeFriend(e: Event, user: User) {
-    e.stopPropagation();
-    const userUpdate = deepClone<User>(user);
-    userUpdate.friends.pop();
-    this.userStore.updateUser(userUpdate);
-  }
-
-  removeUser(e: Event, user: User) {
-    e.stopPropagation();
-    this.userStore.removeUser(user);
   }
 }

@@ -1,23 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { User } from '@models/user.state';
-import { UserStoreStateAdaptService } from '@services/state-adapt/user-store-state-adapt.service';
-import { Observable } from 'rxjs';
+import { UserStore } from '@services/state-adapt/user.store';
 
 @Component({
   selector: 'app-user-list-state-adapt',
   templateUrl: './user-list-state-adapt.component.html',
   styleUrls: ['./user-list-state-adapt.component.scss'],
 })
-export class UserListStateAdaptComponent implements OnInit {
-  users$!: Observable<User[]>;
+export class UserListStateAdaptComponent {
+  users$ = this.userStore.users$;
   /**
    * Class constructor
    */
-  constructor(private storage: UserStoreStateAdaptService) {}
-
-  ngOnInit(): void {
-    this.users$ = this.storage.getUsers();
-  }
+  constructor(private userStore: UserStore) {}
 
   userId(_: number, user: User) {
     return user.userId;
