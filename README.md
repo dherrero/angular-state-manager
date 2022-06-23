@@ -6,7 +6,7 @@ There is a route for each technique. They all are based on a simple User model. 
 
 Techniques:
 
-- [x] Pure Angular
+- [x] Pure Angular (with my own generic class and Flux pattern)
 - [x] [Ngrx](https://ngrx.io)
 - [x] [Elf](https://ngneat.github.io/elf)
 - [x] [NGXS](https://www.ngxs.io)
